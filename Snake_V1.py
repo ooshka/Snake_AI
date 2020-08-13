@@ -44,7 +44,7 @@ program_over = False
 
 disp_size = 600
 n_boxes = 10
-fps = 5
+fps = 8
 border = 1
 
 #Neural Network Details
@@ -52,7 +52,7 @@ border = 1
 
 pop_size = 100
 trials = 5
-generations = 25
+generations = 100
 n_inputs = 6
 
 gen = nw.Generation(n_inputs = n_inputs, n_neurons = 512, n_outputs = 4, population_size = pop_size)
@@ -62,8 +62,8 @@ gen = nw.Generation(n_inputs = n_inputs, n_neurons = 512, n_outputs = 4, populat
 for generation in range(generations):
 
     if generation == generations-1:
-        #pass
-        game = True
+        pass
+        #game = True
 
     if game == True:
 
@@ -97,7 +97,7 @@ for generation in range(generations):
                 dir = [0,0]
                 grow = False
                 tick = 0
-                food_bonus = 50
+                food_bonus = 20
                 num_moves = food_bonus
 
 
@@ -123,19 +123,6 @@ for generation in range(generations):
                     
                     X = numpy.zeros(n_inputs)
 
-                    '''
-                    #Distance to Walls
-
-                    #Distance to left wall
-                    X[0] = snake.body[0][1]
-                    #Distance to right wall
-                    X[1] = (n_boxes - 1) - X[0]
-                    #Distance to top wall
-                    X[2] = snake.body[0][0]
-                    #Distance to bottom wall
-                    X[3] = (n_boxes - 1) - X[2]
-                    '''
-
                     #Distance to food
 
                     #Distance in the vertical direction
@@ -143,59 +130,6 @@ for generation in range(generations):
 
                     #Distance in the horizontal direction
                     X[1] = Ay - snake.body[0][1]
-
-
-                    '''
-                    #Distance to Self
-                    
-                    #Distance to self left
-                    i = snake.body[0][1] - 1
-                    self_found = False
-
-                    while i >= 0:
-                        if A[snake.body[0][0], i] == 1:
-                            X[6] = snake.body[0][1] - i
-                            self_found = True
-                        i-=1
-                    if self_found == False:
-                        X[6] = snake.body[0][1]
-
-                    #Distance to self right
-                    i = snake.body[0][1] + 1
-                    self_found = False
-
-                    while i < n_boxes:
-                        if A[snake.body[0][0], i] == 1:
-                            X[7] = i - snake.body[0][1]
-                            self_found = True
-                        i+=1
-                    if self_found == False:
-                        X[7] = (n_boxes - 1) - snake.body[0][1]
-
-                    #Distance to self up
-                    i = snake.body[0][0] - 1
-                    self_found = False
-
-                    while i >= 0:
-                        if A[i, snake.body[0][1]] == 1:
-                            X[8] = snake.body[0][0] - i
-                            self_found = True
-                        i-=1
-                    if self_found == False:
-                        X[8] = snake.body[0][0]
-
-                    #Distance to self down
-                    i = snake.body[0][0] + 1
-                    self_found = False
-
-                    while i < n_boxes:
-                        if A[i, snake.body[0][1]] == 1:
-                            X[9] = i - snake.body[0][0]
-                            self_found = True
-                        i+=1
-                    if self_found == False:
-                        X[9] = (n_boxes - 1) - snake.body[0][0]
-                    '''
 
                     #Fill function to decide which direction is safest to turn
 
