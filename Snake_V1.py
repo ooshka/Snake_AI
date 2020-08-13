@@ -52,7 +52,7 @@ border = 1
 
 pop_size = 100
 trials = 5
-generations = 1000
+generations = 25
 n_inputs = 6
 
 gen = nw.Generation(n_inputs = n_inputs, n_neurons = 512, n_outputs = 4, population_size = pop_size)
@@ -268,7 +268,6 @@ for generation in range(generations):
                             ind = snake.body.index((snake.body[0][0],snake.body[0][1]),2)
                             if ind != 0:
                                 game_over = True
-                                print("Game Over Self Hit ", ind)
                         except ValueError:
                             pass
                     

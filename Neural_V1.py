@@ -112,15 +112,33 @@ class Model:
 		for i in range(len(child.layers)):
 
 			if hasattr(child.layers[i], 'weights'):
-				
-				pass_on = bool(random.getrandbits(1))
 
+				for x in range(self.layers[i].weights.shape[0]):
+					for j in range(self.layers[i].weights.shape[1]):
+
+						pass_on = bool(random.getrandbits(1))
+
+						if pass_on == True:
+							self.layers[i].weights[x][j] = self.layers[i].weights[x][j]
+						else:
+							self.layers[i].weights[x][j] = mom.layers[i].weights[x][j]
+
+				for j in range(self.layers[i].biases.shape[1]):
+
+					pass_on = bool(random.getrandbits(1))
+					
+					if pass_on == True:
+						self.layers[i].biases[0][j] = self.layers[i].biases[0][j]
+					else:
+						self.layers[i].biases[0][j] = mom.layers[i].biases[0][j]
+				'''
 				if pass_on == True:
 					child.layers[i].weights = self.layers[i].weights
 					child.layers[i].biases = self.layers[i].biases
 				else:
 					child.layers[i].weights = mom.layers[i].weights
 					child.layers[i].biases = mom.layers[i].biases
+				'''
 
 
 		child.score = 0
