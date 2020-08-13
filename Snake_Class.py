@@ -10,8 +10,8 @@ class Snake:
 	def fill(self, B, head, count, s_len):
 
 	    if count >= s_len:
-	        #pass
-	        return count
+	        pass
+	        #return count
 
 	    if head[0] < 0 or head[0] >= len(B):
 	        return count
@@ -20,40 +20,27 @@ class Snake:
 	    if B[head[0], head[1]] == 1:
 	        return count
 
-	    if head[1] - 1 >= 0 and B[head[0], head[1] - 1] != 1:
-	        B[head[0], head[1] - 1] = 3
-	        count+=1
+		B[head[0], head[1]] = 3
+		count+=1
 
-	        rec_count = self.fill(B, [head[0], head[1] - 1], count, s_len)
+		left_count = self.fill(B, [head[0], head[1] - 1], count, s_len)
 
-	        if rec_count>count:
-	            count = rec_count
+		if left_count>count:
+			count = left_count
 
-	    if head[1] + 1 < len(B) and B[head[0], head[1] + 1] != 1:
-	        B[head[0], head[1] + 1] = 3
-	        count+=1
+		right_count = self.fill(B, [head[0], head[1] + 1], count, s_len)
 
-	        rec_count = self.fill(B, [head[0], head[1] + 1], count, s_len)
+		if right_count>count:
+			count = right_count
 
-	        if rec_count>count:
-	            count = rec_count
+		up_count = self.fill(B, [head[0] - 1, head[1]], count, s_len)
 
-	    if head[0] - 1 >= 0 and B[head[0] - 1, head[1]] != 1:
-	        B[head[0] - 1, head[1]] = 3
-	        count+=1
+		if up_count>count:
+			count = up_count
 
-	        rec_count = self.fill(B, [head[0] - 1, head[1]], count, s_len)
+		down_count = self.fill(B, [head[0] + 1, head[1]], count, s_len)
 
-	        if rec_count>count:
-	            count = rec_count
-
-	    if head[0] + 1 < len(B) and B[head[0] + 1, head[1]] != 1:
-	        B[head[0] + 1, head[1]] = 3
-	        count+=1
-
-	        rec_count = self.fill(B, [head[0] + 1, head[1]], count, s_len)
-
-	        if rec_count>count:
-	            count = rec_count
+		if down_count>count:
+			count = down_count
 	            
 	    return count

@@ -215,7 +215,6 @@ for generation in range(generations):
                     B = copy.copy(A)
                     X[5] = snake.fill(B,(snake.body[0][0] + 1, snake.body[0][1]), 0, len(snake.body))
 
-
                     print(X)
 
                     #Get prediction from the output of the model being iterated through
