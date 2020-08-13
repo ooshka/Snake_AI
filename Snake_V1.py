@@ -9,6 +9,7 @@ import copy
 import numpy
 import random
 import Neural_V1 as nw
+import Snake_Class as sn
 
 # Define some colors
 BLACK = (0, 0, 0)
@@ -31,57 +32,6 @@ def random_insert(Array, size):
         y = random.randint(0,size-1)
     return x,y
 
-def snake_fill(B, head, count, s_len):
-
-    if count >= s_len:
-        #pass
-        return count
-
-    if head[0] < 0 or head[0] >= len(B):
-        return count
-    if head[1] < 0 or head[1] >= len(B):
-        return count
-    if B[head[0], head[1]] == 1:
-        return count
-
-    if head[1] - 1 >= 0 and B[head[0], head[1] - 1] == 0:
-        B[head[0], head[1] - 1] = 3
-        count+=1
-
-        rec_count = snake_fill(B, [head[0], head[1] - 1], count, s_len)
-
-        if rec_count>count:
-            count = rec_count
-
-    if head[1] + 1 < len(B) and B[head[0], head[1] + 1] == 0:
-        B[head[0], head[1] + 1] = 3
-        count+=1
-
-        rec_count = snake_fill(B, [head[0], head[1] + 1], count, s_len)
-
-        if rec_count>count:
-            count = rec_count
-
-    if head[0] - 1 >= 0 and B[head[0] - 1, head[1]] == 0:
-        B[head[0] - 1, head[1]] = 3
-        count+=1
-
-        rec_count = snake_fill(B, [head[0] - 1, head[1]], count, s_len)
-
-        if rec_count>count:
-            count = rec_count
-
-    if head[0] + 1 < len(B) and B[head[0] + 1, head[1]] == 0:
-        B[head[0] + 1, head[1]] = 3
-        count+=1
-
-        rec_count = snake_fill(B, [head[0] + 1, head[1]], count, s_len)
-
-        if rec_count>count:
-            count = rec_count
-            
-    return count
-
 ############################ Start of main function code #############################################
 
 global SCREEN, CLOCK
@@ -95,15 +45,15 @@ program_over = False
 
 disp_size = 600
 n_boxes = 10
-fps = 10
+fps = 2
 border = 1
 
 #Neural Network Details
 #######################################################################################
 
-pop_size = 100
-trials = 5
-generations = 100
+pop_size = 1
+trials = 1
+generations = 1
 n_inputs = 6
 
 gen = nw.Generation(n_inputs = n_inputs, n_neurons = 512, n_outputs = 4, population_size = pop_size)
@@ -140,10 +90,9 @@ for generation in range(generations):
                 A = numpy.zeros([n_boxes,n_boxes])
 
                 game_over = False
-
                 # #Place head of snake
                 Sx,Sy = random_insert(A, n_boxes)
-                snake = [(Sx,Sy)]
+                snake = sn.Snake((Sx,Sy))
                 A[Sx,Sy] = 1
                 dir = [0,0]
                 grow = False
@@ -178,11 +127,11 @@ for generation in range(generations):
                     #Distance to Walls
 
                     #Distance to left wall
-                    X[0] = snake[0][1]
+                    X[0] = snake.body[0][1]
                     #Distance to right wall
                     X[1] = (n_boxes - 1) - X[0]
                     #Distance to top wall
-                    X[2] = snake[0][0]
+                    X[2] = snake.body[0][0]
                     #Distance to bottom wall
                     X[3] = (n_boxes - 1) - X[2]
                     '''
@@ -190,84 +139,84 @@ for generation in range(generations):
                     #Distance to food
 
                     #Distance in the vertical direction
-                    X[0] = Ax - snake[0][0]
+                    X[0] = Ax - snake.body[0][0]
 
                     #Distance in the horizontal direction
-                    X[1] = Ay - snake[0][1]
+                    X[1] = Ay - snake.body[0][1]
 
 
                     '''
                     #Distance to Self
                     
                     #Distance to self left
-                    i = snake[0][1] - 1
+                    i = snake.body[0][1] - 1
                     self_found = False
 
                     while i >= 0:
-                        if A[snake[0][0], i] == 1:
-                            X[6] = snake[0][1] - i
+                        if A[snake.body[0][0], i] == 1:
+                            X[6] = snake.body[0][1] - i
                             self_found = True
                         i-=1
                     if self_found == False:
-                        X[6] = snake[0][1]
+                        X[6] = snake.body[0][1]
 
                     #Distance to self right
-                    i = snake[0][1] + 1
+                    i = snake.body[0][1] + 1
                     self_found = False
 
                     while i < n_boxes:
-                        if A[snake[0][0], i] == 1:
-                            X[7] = i - snake[0][1]
+                        if A[snake.body[0][0], i] == 1:
+                            X[7] = i - snake.body[0][1]
                             self_found = True
                         i+=1
                     if self_found == False:
-                        X[7] = (n_boxes - 1) - snake[0][1]
+                        X[7] = (n_boxes - 1) - snake.body[0][1]
 
                     #Distance to self up
-                    i = snake[0][0] - 1
+                    i = snake.body[0][0] - 1
                     self_found = False
 
                     while i >= 0:
-                        if A[i, snake[0][1]] == 1:
-                            X[8] = snake[0][0] - i
+                        if A[i, snake.body[0][1]] == 1:
+                            X[8] = snake.body[0][0] - i
                             self_found = True
                         i-=1
                     if self_found == False:
-                        X[8] = snake[0][0]
+                        X[8] = snake.body[0][0]
 
                     #Distance to self down
-                    i = snake[0][0] + 1
+                    i = snake.body[0][0] + 1
                     self_found = False
 
                     while i < n_boxes:
-                        if A[i, snake[0][1]] == 1:
-                            X[9] = i - snake[0][0]
+                        if A[i, snake.body[0][1]] == 1:
+                            X[9] = i - snake.body[0][0]
                             self_found = True
                         i+=1
                     if self_found == False:
-                        X[9] = (n_boxes - 1) - snake[0][0]
+                        X[9] = (n_boxes - 1) - snake.body[0][0]
                     '''
 
                     #Fill function to decide which direction is safest to turn
 
                     #left fill
                     B = copy.copy(A)
-                    X[2] = snake_fill(B,(snake[0][0], snake[0][1] - 1), 0, len(snake))
+                    X[2] = snake.fill(B,(snake.body[0][0], snake.body[0][1] - 1), 0, len(snake.body))
 
                     #right fill
                     B = copy.copy(A)
-                    X[3] = snake_fill(B,(snake[0][0], snake[0][1] + 1), 0, len(snake))
+                    X[3] = snake.fill(B,(snake.body[0][0], snake.body[0][1] + 1), 0, len(snake.body))
 
                     #up fill
                     B = copy.copy(A)
-                    X[4] = snake_fill(B,(snake[0][0] - 1, snake[0][1]), 0, len(snake))
+                    X[4] = snake.fill(B,(snake.body[0][0] - 1, snake.body[0][1]), 0, len(snake.body))
 
                     #down fill
                     B = copy.copy(A)
-                    X[5] = snake_fill(B,(snake[0][0] + 1, snake[0][1]), 0, len(snake))
+                    X[5] = snake.fill(B,(snake.body[0][0] + 1, snake.body[0][1]), 0, len(snake.body))
 
 
-                    #print(X)
+                    print(X)
 
                     #Get prediction from the output of the model being iterated through
                     output = model.forward(X)
@@ -327,14 +276,14 @@ for generation in range(generations):
                     #Do Snake manipulation here 
 
                     #Check for out of bounds
-                    if snake[0][0]+dir[0] > (n_boxes-1) or snake[0][0]+dir[0] < 0 or snake[0][1]+dir[1] > (n_boxes-1) or snake[0][1]+dir[1] < 0:
+                    if snake.body[0][0]+dir[0] > (n_boxes-1) or snake.body[0][0]+dir[0] < 0 or snake.body[0][1]+dir[1] > (n_boxes-1) or snake.body[0][1]+dir[1] < 0:
                         game_over = True
                     
                     else:
 
                         #Check for self hit
                         try:
-                            ind = snake.index((snake[0][0],snake[0][1]),2)
+                            ind = snake.body.index((snake.body[0][0],snake.body[0][1]),2)
                             if ind != 0:
                                 game_over = True
                                 print("Game Over Self Hit ", ind)
@@ -343,20 +292,20 @@ for generation in range(generations):
                     
                     if game_over != True:
 
-                        snake.insert(0,(snake[0][0]+dir[0], snake[0][1]+dir[1]))
+                        snake.body.insert(0,(snake.body[0][0]+dir[0], snake.body[0][1]+dir[1]))
 
                         
-                        if A[snake[0][0],snake[0][1]] == 2:
+                        if A[snake.body[0][0],snake.body[0][1]] == 2:
                              grow = True
                              num_moves += food_bonus
 
                         if grow != True:
-                            A[snake[-1][0],snake[-1][1]]=0
-                            snake.pop(-1)
+                            A[snake.body[-1][0],snake.body[-1][1]]=0
+                            snake.body.pop(-1)
                         else:
                             grow = False
 
-                        for block in snake:
+                        for block in snake.body:
                             A[block[0],block[1]]=1
 
                         if game == True:
@@ -376,7 +325,7 @@ for generation in range(generations):
                         num_moves -= 1
 
                 #Once we've broken out of the loop quit the game
-                score = tick*(len(snake)-1)
+                score = tick*(len(snake.body)-1)
 
                 model.score += score
 

@@ -116,11 +116,9 @@ class Model:
 				pass_on = bool(random.getrandbits(1))
 
 				if pass_on == True:
-					print("Male")
 					child.layers[i].weights = self.layers[i].weights
 					child.layers[i].biases = self.layers[i].biases
 				else:
-					print("Female")
 					child.layers[i].weights = mom.layers[i].weights
 					child.layers[i].biases = mom.layers[i].biases
 
