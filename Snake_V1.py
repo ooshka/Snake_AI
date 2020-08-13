@@ -40,20 +40,19 @@ global SCREEN, CLOCK
 #random.seed(10)
 
 game = False
-user_input = False
 program_over = False
 
 disp_size = 600
 n_boxes = 10
-fps = 2
+fps = 5
 border = 1
 
 #Neural Network Details
 #######################################################################################
 
-pop_size = 1
-trials = 1
-generations = 1
+pop_size = 100
+trials = 5
+generations = 1000
 n_inputs = 6
 
 gen = nw.Generation(n_inputs = n_inputs, n_neurons = 512, n_outputs = 4, population_size = pop_size)
@@ -63,6 +62,7 @@ gen = nw.Generation(n_inputs = n_inputs, n_neurons = 512, n_outputs = 4, populat
 for generation in range(generations):
 
     if generation == generations-1:
+        #pass
         game = True
 
     if game == True:
@@ -90,7 +90,7 @@ for generation in range(generations):
                 A = numpy.zeros([n_boxes,n_boxes])
 
                 game_over = False
-                # #Place head of snake
+                #Place head of snake
                 Sx,Sy = random_insert(A, n_boxes)
                 snake = sn.Snake((Sx,Sy))
                 A[Sx,Sy] = 1
@@ -215,7 +215,7 @@ for generation in range(generations):
                     B = copy.copy(A)
                     X[5] = snake.fill(B,(snake.body[0][0] + 1, snake.body[0][1]), 0, len(snake.body))
 
-                    print(X)
+                    #print(X)
 
                     #Get prediction from the output of the model being iterated through
                     output = model.forward(X)
@@ -226,50 +226,33 @@ for generation in range(generations):
                         #Check for game over or user quit
                         for event in pygame.event.get():
 
-                            #If we want to use user input we take in keyboard inputs
-                            if user_input == True:
-
-                                if event.type == pygame.KEYDOWN:
-                                    if event.key == pygame.K_LEFT and dir != [0,1]:
-                                        dir = [0,-1]
-                                    elif event.key == pygame.K_RIGHT and dir != [0,-1]:
-                                        dir = [0,1]
-                                    elif event.key == pygame.K_UP and dir != [1,0]:
-                                        dir = [-1,0]
-                                    elif event.key == pygame.K_DOWN and dir != [-1,0]: 
-                                        dir = [1,0]
-                                    if event.key == pygame.K_ESCAPE:
-                                        game_over = True
-
                             if event.type == pygame.QUIT:
                                 game_over = True
                                 program_over = True
 
-                    if user_input == False:
+                    if prediction == 0:
+                        if dir == [0,1]:
+                            pass
+                        else:
+                            dir = [0,-1]
 
-                        if prediction == 0:
-                            if dir == [0,1]:
-                                pass
-                            else:
-                                dir = [0,-1]
+                    elif prediction == 1:
+                        if dir == [0,-1]:
+                            pass
+                        else:
+                            dir = [0,1]
 
-                        elif prediction == 1:
-                            if dir == [0,-1]:
-                                pass
-                            else:
-                                dir = [0,1]
+                    elif prediction == 2:
+                        if dir == [1,0]:
+                            pass
+                        else:
+                            dir = [-1,0]
 
-                        elif prediction == 2:
-                            if dir == [1,0]:
-                                pass
-                            else:
-                                dir = [-1,0]
-
-                        elif prediction == 3:
-                            if dir == [-1,0]:
-                                pass
-                            else:
-                                dir = [1,0]
+                    elif prediction == 3:
+                        if dir == [-1,0]:
+                            pass
+                        else:
+                            dir = [1,0]
 
 
                     #Do Snake manipulation here 
@@ -324,15 +307,14 @@ for generation in range(generations):
                         num_moves -= 1
 
                 #Once we've broken out of the loop quit the game
-                score = tick*(len(snake.body)-1)
+                score = tick*(len(snake.body))
 
                 model.score += score
 
             model.score = model.score/trials
 
     gen.score_sort()
-
-
+    
     print("Gen ", generation, " Score is: ", gen.population[0].score)
 
     gen.generation_mate()

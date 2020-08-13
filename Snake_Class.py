@@ -9,16 +9,16 @@ class Snake:
 
 	def fill(self, B, head, count, s_len):
 
-	    if count >= s_len:
-	        pass
-	        #return count
+		if count >= s_len:
+			#pass
+			return count
 
-	    if head[0] < 0 or head[0] >= len(B):
-	        return count
-	    if head[1] < 0 or head[1] >= len(B):
-	        return count
-	    if B[head[0], head[1]] == 1:
-	        return count
+		if head[0] < 0 or head[0] >= len(B):
+			return count
+		if head[1] < 0 or head[1] >= len(B):
+			return count
+		if B[head[0], head[1]] == 1 or B[head[0], head[1]] == 3:
+			return count
 
 		B[head[0], head[1]] = 3
 		count+=1
@@ -43,4 +43,4 @@ class Snake:
 		if down_count>count:
 			count = down_count
 	            
-	    return count
+		return count
