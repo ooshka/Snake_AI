@@ -37,6 +37,19 @@ class Layer_Dense:
 		#Calculate the basic output value of the neuron usings the dot product between weights and inputs and adding the bias
 		self.output = np.dot(inputs, self.weights) + self.biases
 
+#Last layer used for obtaining output of model
+class Layer_Output:
+
+	#Layer Initialization
+	def __init__(self, n_inputs, n_outputs):
+
+		self.weights = 0.01 * np.random.randn(n_inputs, n_outputs)
+
+	def forward(self, inputs):
+		#Calculate forward pass through the output layer
+		self.output = np.dot(inputs, self.weights)
+
+
 #Rectified Linear Activaiton to be used within the hidden layers
 class Activation_ReLu:
 	#Forward Pass
@@ -113,6 +126,16 @@ class Model:
 
 			if hasattr(child.layers[i], 'weights'):
 
+				'''
+				pass_on = bool(random.getrandbits(1))
+				
+				if pass_on == True:
+					child.layers[i].weights = self.layers[i].weights
+				else:
+					child.layers[i].weights = mom.layers[i].weights
+
+				'''
+
 				for x in range(self.layers[i].weights.shape[0]):
 					for j in range(self.layers[i].weights.shape[1]):
 
@@ -122,6 +145,18 @@ class Model:
 							self.layers[i].weights[x][j] = self.layers[i].weights[x][j]
 						else:
 							self.layers[i].weights[x][j] = mom.layers[i].weights[x][j]
+				
+
+			if hasattr(child.layers[i], "biases"):
+				'''
+				pass_on = bool(random.getrandbits(1))
+
+				
+				if pass_on == True:
+					child.layers[i].biases = self.layers[i].biases
+				else:
+					child.layers[i].biases = mom.layers[i].biases
+				'''
 
 				for j in range(self.layers[i].biases.shape[1]):
 
@@ -129,17 +164,10 @@ class Model:
 					
 					if pass_on == True:
 						self.layers[i].biases[0][j] = self.layers[i].biases[0][j]
+
 					else:
 						self.layers[i].biases[0][j] = mom.layers[i].biases[0][j]
-				'''
-				if pass_on == True:
-					child.layers[i].weights = self.layers[i].weights
-					child.layers[i].biases = self.layers[i].biases
-				else:
-					child.layers[i].weights = mom.layers[i].weights
-					child.layers[i].biases = mom.layers[i].biases
-				'''
-
+				
 
 		child.score = 0
 
@@ -159,6 +187,46 @@ class Model:
 		#In our case this probably should be the probabilities of the choices
 		return layer.output
 
+	def Model_Write(self):
+
+		f = open("Model_Weights.txt", "w")
+
+		for i in range(len(self.layers)):
+
+			if hasattr(self.layers[i], 'weights'):
+
+				f.write("\n")
+
+				for x in range(self.layers[i].weights.shape[0]):
+					
+					f.write("\n")
+
+					for j in range(self.layers[i].weights.shape[1]):
+
+						f.write("%s " % self.layers[i].weights[x][j])
+
+		f.close
+
+		f = open("Model_Biases.txt", "w")
+
+		for i in range(len(self.layers)):
+
+			if hasattr(self.layers[i], 'biases'):
+
+				print("Layer ", i, " has length: ", self.layers[i].biases.shape[1])
+
+				f.write("\n")
+
+				for j in range(self.layers[i].biases.shape[1]):
+
+					f.write("%s " % self.layers[i].biases[0][j])
+
+		f.close
+
+
+
+
+
 
 def Model_Creator(self, n_inputs, n_neurons, n_outputs):
 
@@ -168,13 +236,20 @@ def Model_Creator(self, n_inputs, n_neurons, n_outputs):
 	#Add layers
 	model.add(Layer_Dense(n_inputs,n_neurons))
 	model.add(Activation_ReLu())
-	model.add(Layer_Dense(n_neurons,n_outputs))
+	model.add(Layer_Dense(n_neurons,n_neurons))
+	model.add(Activation_ReLu())
+	model.add(Layer_Output(n_neurons,n_outputs))
 	model.add(Activation_SoftMax())
 
 	#Finalize the model
 	model.finalize()
 
 	return model
+
+
+
+
+
 
 #Define a super generation class to include a population of models
 class Generation:
@@ -207,62 +282,4 @@ class Generation:
 		new_population[-1] = self.population[0]
 
 		self.population = new_population
-
-
-
-'''
-#Basic model testing with Sentdex data
-#Create the custom data set based on Sentdex course
-X, y = spiral_data(100, 3)
-
-#Instantiate the model
-model = Model()
-
-#Add layers
-model.add(Layer_Dense(2,512))
-model.add(Activation_ReLu())
-model.add(Layer_Dense(512,3))
-model.add(Activation_SoftMax())
-
-#Finalize the model
-model.finalize()
-
-#This should be placed within a "training algorithm"
-output = model.forward(X)
-
-'''
-
-
-'''
-
-#This is all the hardcoded testing that was done originally
-
-#Create a dense layer with inputs and outputs
-dense1 = Layer_Dense(num_inputs, num_outputs)
-
-dense2 = Layer_Dense(dense1.weights.shape[0] + 1, num_outputs)
-
-print(dense1.weights.shape[0])
-
-#Create activation object for hidden layers
-activation1 = Activation_ReLu()
-activation2 = Activation_SoftMax()
-
-#Make a forward pass with our training data
-dense1.forward(X)
-
-#Run initial neuron layer outputs through ReLu activation
-activation1.forward(dense1.output)
-
-#Run outputs of activaiton1 through the second hidden layer
-dense2.forward(activation1.output)
-
-#Run the outputs of the second hidden layer through the SofMax activation function
-activation2.forward(dense2.output)
-
-#Look at the first few samples
-print(activation2.output[:5])
-
-'''
-
 

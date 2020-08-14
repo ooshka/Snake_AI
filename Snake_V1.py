@@ -46,16 +46,17 @@ disp_size = 600
 n_boxes = 10
 fps = 8
 border = 1
+high_score = 0
 
 #Neural Network Details
 #######################################################################################
 
 pop_size = 100
 trials = 5
-generations = 100
+generations = 1000
 n_inputs = 6
 
-gen = nw.Generation(n_inputs = n_inputs, n_neurons = 512, n_outputs = 4, population_size = pop_size)
+gen = nw.Generation(n_inputs = n_inputs, n_neurons = 64, n_outputs = 4, population_size = pop_size)
 
 #######################################################################################
 
@@ -245,6 +246,10 @@ for generation in range(generations):
                 model.score += score
 
             model.score = model.score/trials
+
+            if model.score > high_score:
+                high_score = model.score
+
 
     gen.score_sort()
     
