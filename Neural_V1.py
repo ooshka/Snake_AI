@@ -25,12 +25,12 @@ class Layer_Dense:
 	#Layer Initialization
 	def __init__(self, n_inputs, n_neurons):
 		#Initialize both weights and biases
-		self.weights = 0.01 * np.random.randn(n_inputs, n_neurons)
+		self.weights = 1 * np.random.randn(n_inputs, n_neurons)
 
 		#This initializes the biases to zero.  We may not want this as the genetic algorithm has no way to alter the biases through mating
 		#self.biases = np.zeros((1, n_neurons))
 
-		self.biases = 0.01 * np.random.randn(1, n_neurons)
+		self.biases = 1 * np.random.randn(1, n_neurons)
 
 	#Forward Pass Through Neuron
 	def forward(self, inputs):
@@ -119,58 +119,82 @@ class Model:
 
 				#We are ignoring the loss aspect of the training b/c genetic
 
-	def mate(self, mom):
+	def mate(self, mom, mutate = False):
 		
 		child = copy.deepcopy(self)
-		for i in range(len(child.layers)):
 
-			if hasattr(child.layers[i], 'weights'):
+		if mutate == False:
 
-				'''
-				pass_on = bool(random.getrandbits(1))
-				
-				if pass_on == True:
-					child.layers[i].weights = self.layers[i].weights
-				else:
-					child.layers[i].weights = mom.layers[i].weights
+			for i in range(len(child.layers)):
 
-				'''
+				if hasattr(child.layers[i], 'weights'):
 
-				for x in range(self.layers[i].weights.shape[0]):
-					for j in range(self.layers[i].weights.shape[1]):
-
-						pass_on = bool(random.getrandbits(1))
-
-						if pass_on == True:
-							self.layers[i].weights[x][j] = self.layers[i].weights[x][j]
-						else:
-							self.layers[i].weights[x][j] = mom.layers[i].weights[x][j]
-				
-
-			if hasattr(child.layers[i], "biases"):
-				'''
-				pass_on = bool(random.getrandbits(1))
-
-				
-				if pass_on == True:
-					child.layers[i].biases = self.layers[i].biases
-				else:
-					child.layers[i].biases = mom.layers[i].biases
-				'''
-
-				for j in range(self.layers[i].biases.shape[1]):
-
+					'''
 					pass_on = bool(random.getrandbits(1))
 					
 					if pass_on == True:
-						self.layers[i].biases[0][j] = self.layers[i].biases[0][j]
-
+						child.layers[i].weights = self.layers[i].weights
 					else:
-						self.layers[i].biases[0][j] = mom.layers[i].biases[0][j]
+						child.layers[i].weights = mom.layers[i].weights
+
+					'''
+
+					for x in range(child.layers[i].weights.shape[0]):
+						for j in range(child.layers[i].weights.shape[1]):
+
+							pass_on = bool(random.getrandbits(1))
+
+							if pass_on == True:
+								child.layers[i].weights[x][j] = self.layers[i].weights[x][j]
+							else:
+								child.layers[i].weights[x][j] = mom.layers[i].weights[x][j]
+					
+
+				if hasattr(child.layers[i], "biases"):
+					'''
+					pass_on = bool(random.getrandbits(1))
+
+					
+					if pass_on == True:
+						child.layers[i].biases = self.layers[i].biases
+					else:
+						child.layers[i].biases = mom.layers[i].biases
+					'''
+
+					for j in range(child.layers[i].biases.shape[1]):
+
+						pass_on = bool(random.getrandbits(1))
+						
+						if pass_on == True:
+							child.layers[i].biases[0][j] = self.layers[i].biases[0][j]
+
+						else:
+							child.layers[i].biases[0][j] = mom.layers[i].biases[0][j]
 				
+		else:
+
+			for i in range(len(child.layers)):
+
+				if hasattr(child.layers[i], 'weights'):
+
+					for x in range(child.layers[i].weights.shape[0]):
+						for j in range(child.layers[i].weights.shape[1]):
+							up_down = random.uniform(-0.1,0.1)
+							child.layers[i].weights[x][j]*= (1+up_down)
+
+				if hasattr(child.layers[i], 'biases'):
+
+					for j in range(child.layers[i].biases.shape[1]):
+						up_down = random.uniform(-0.1,0.1)
+						child.layers[i].biases[0][j]*= (1+up_down)
+
+
+
+
+
 
 		child.score = 0
-
+         
 		return child
 
 	#Perform the large forward pass of the model
@@ -253,11 +277,12 @@ def Model_Creator(self, n_inputs, n_neurons, n_outputs):
 
 #Define a super generation class to include a population of models
 class Generation:
-	def __init__(self, n_inputs, n_neurons, n_outputs, mating = True,  population_size = 100, threshold = 10):
+	def __init__(self, n_inputs, n_neurons, n_outputs, mating = True,  population_size = 100, threshold = 10, mutate_threshold = 0.75):
 		
 		self.population_size = population_size
 		self.mating = mating
 		self.threshold = threshold
+		self.mutate_threshold = mutate_threshold
 
 		self.population = []
 		for i in range(population_size):
@@ -275,7 +300,13 @@ class Generation:
 			p1_indx = i % self.threshold
 			p2_indx = min(self.population_size - 1, int(np.random.exponential(self.threshold)))
 
-			offspring = self.population[p1_indx].mate(self.population[p2_indx])
+			if i < self.mutate_threshold:
+
+				offspring = self.population[p1_indx].mate(self.population[p2_indx])
+
+			else:
+
+				offspring = self.population[p1_indx].mate(self.population[p2_indx], True)
 
 			new_population.append(offspring)
 

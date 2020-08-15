@@ -53,18 +53,18 @@ high_score = 0
 
 pop_size = 100
 trials = 5
-generations = 1000
+generations = 500
 n_inputs = 6
 
-gen = nw.Generation(n_inputs = n_inputs, n_neurons = 64, n_outputs = 4, population_size = pop_size)
+gen = nw.Generation(n_inputs = n_inputs, n_neurons = 16, n_outputs = 4, population_size = pop_size)
 
 #######################################################################################
 
 for generation in range(generations):
 
     if generation == generations-1:
-        pass
-        #game = True
+        #pass
+        game = True
 
     if game == True:
 
@@ -154,6 +154,7 @@ for generation in range(generations):
 
                     #Get prediction from the output of the model being iterated through
                     output = model.forward(X)
+
                     prediction = numpy.argmax(output)
 
                     if game == True:
