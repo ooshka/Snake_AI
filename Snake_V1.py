@@ -1,8 +1,10 @@
 """
- Snake V0
- 2020-07-22
+Snake V0
+2020-07-22
 """
- 
+
+
+
 import sys
 import pygame
 import copy
@@ -32,31 +34,32 @@ def random_insert(Array, size):
         y = random.randint(0,size-1)
     return x,y
 
+
+
+
 ############################ Start of main function code #############################################
 
 global SCREEN, CLOCK
 
-#Set the random seed so that each playthrough is identical
-#random.seed(10)
-
 game = False
 program_over = False
+first = True
 
 disp_size = 600
 n_boxes = 10
-fps = 8
+fps = 25
 border = 1
 high_score = 0
 
 #Neural Network Details
 #######################################################################################
 
-pop_size = 100
+pop_size = 1
 trials = 5
-generations = 500
+generations = 1
 n_inputs = 6
 
-gen = nw.Generation(n_inputs = n_inputs, n_neurons = 16, n_outputs = 4, population_size = pop_size)
+gen = nw.Generation(n_inputs = n_inputs, n_neurons = 64, n_outputs = 4, population_size = pop_size)
 
 #######################################################################################
 
@@ -82,6 +85,9 @@ for generation in range(generations):
 
     for model in gen.population:
 
+        if first == True:
+            model.Model_Read()
+            first = False
 
         if program_over == False:
 
@@ -98,7 +104,7 @@ for generation in range(generations):
                 dir = [0,0]
                 grow = False
                 tick = 0
-                food_bonus = 20
+                food_bonus = 25
                 num_moves = food_bonus
 
 
@@ -135,20 +141,23 @@ for generation in range(generations):
                     #Fill function to decide which direction is safest to turn
 
                     #left fill
-                    B = copy.copy(A)
-                    X[2] = snake.fill(B,(snake.body[0][0], snake.body[0][1] - 1), 0, len(snake.body))
+                    L = copy.copy(A)
+                    X[2] = snake.fill(L, (snake.body[0][0], snake.body[0][1] - 1), 0, len(snake.body))
+                    
 
                     #right fill
-                    B = copy.copy(A)
-                    X[3] = snake.fill(B,(snake.body[0][0], snake.body[0][1] + 1), 0, len(snake.body))
+                    R = copy.copy(A)
+                    X[3] = snake.fill(R, (snake.body[0][0], snake.body[0][1] + 1), 0, len(snake.body))
+                    
 
                     #up fill
-                    B = copy.copy(A)
-                    X[4] = snake.fill(B,(snake.body[0][0] - 1, snake.body[0][1]), 0, len(snake.body))
+                    U = copy.copy(A)
+                    X[4] = snake.fill(U, (snake.body[0][0] - 1, snake.body[0][1]), 0, len(snake.body))
+                    
 
                     #down fill
-                    B = copy.copy(A)
-                    X[5] = snake.fill(B,(snake.body[0][0] + 1, snake.body[0][1]), 0, len(snake.body))
+                    D = copy.copy(A)
+                    X[5] = snake.fill(D, (snake.body[0][0] + 1, snake.body[0][1]), 0, len(snake.body))
 
                     #print(X)
 
@@ -245,12 +254,12 @@ for generation in range(generations):
                 score = tick*(len(snake.body))
 
                 model.score += score
-
+ 
             model.score = model.score/trials
 
             if model.score > high_score:
                 high_score = model.score
-
+                model.Model_Write()
 
     gen.score_sort()
     

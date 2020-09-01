@@ -71,10 +71,13 @@ class Activation_SoftMax:
 #Overall Model Class that will house all pieces of the network
 class Model:
 
-	def __init__(self):
+	def __init__(self, n_inputs, n_neurons, n_outputs):
 		#Create a list of the objects in the network
 		self.layers = []
 		self.score = 0
+		self.n_inputs = n_inputs
+		self.n_neurons = n_neurons
+		self.n_outputs = n_outputs
 
 	#Add objects to the model
 	def add(self, layer):
@@ -119,7 +122,7 @@ class Model:
 
 				#We are ignoring the loss aspect of the training b/c genetic
 
-	def mate(self, mom, mutate = False):
+	def mate(self, mom, mutate = False, mutate_strength = 0.05):
 		
 		child = copy.deepcopy(self)
 
@@ -179,13 +182,13 @@ class Model:
 
 					for x in range(child.layers[i].weights.shape[0]):
 						for j in range(child.layers[i].weights.shape[1]):
-							up_down = random.uniform(-0.1,0.1)
+							up_down = random.uniform(-mutate_strength, mutate_strength)
 							child.layers[i].weights[x][j]*= (1+up_down)
 
 				if hasattr(child.layers[i], 'biases'):
 
 					for j in range(child.layers[i].biases.shape[1]):
-						up_down = random.uniform(-0.1,0.1)
+						up_down = random.uniform(-mutate_strength, mutate_strength)
 						child.layers[i].biases[0][j]*= (1+up_down)
 
 
@@ -215,6 +218,10 @@ class Model:
 
 		f = open("Model_Weights.txt", "w")
 
+		f.write("%s " % self.n_inputs)
+		f.write("%s " % self.n_neurons)
+		f.write("%s " % self.n_outputs)
+
 		for i in range(len(self.layers)):
 
 			if hasattr(self.layers[i], 'weights'):
@@ -233,12 +240,15 @@ class Model:
 
 		f = open("Model_Biases.txt", "w")
 
+		f.write("%s " % self.n_inputs)
+		f.write("%s " % self.n_neurons)
+		f.write("%s " % self.n_outputs)
+
 		for i in range(len(self.layers)):
 
 			if hasattr(self.layers[i], 'biases'):
 
-				print("Layer ", i, " has length: ", self.layers[i].biases.shape[1])
-
+				f.write("\n")
 				f.write("\n")
 
 				for j in range(self.layers[i].biases.shape[1]):
@@ -247,28 +257,90 @@ class Model:
 
 		f.close
 
+	def Model_Read(self):
+
+		f = open("Model_Weights.txt", "r")
+
+		first = True
+		i = -1
+		x = 0
+
+		for line in f:
+
+			values = line.split()
+
+			if values == []:
+				x = -1
+				i+=1
+
+			else:
+
+				if first == True:
+
+					first = False
+
+					if int(values[0]) != self.n_inputs:
+						print("Number of Model Inputs Does Not Match")
+						return -1
+
+					elif int(values[1]) != self.n_neurons:
+						print("Number of Model Neurons Does Not Match")
+						return -1
+
+					elif int(values[2]) != self.n_outputs:
+						print("Number of Model Outputs Does Not Match")
+						return -1
+
+				else:
+
+					while not(hasattr(self.layers[i], "weights")):
+						i+=1
+
+					for j in range(self.layers[i].weights.shape[1]):
+
+						self.layers[i].weights[x][j] = float(values[j])
+			x+=1
+		f.close
 
 
+		f = open("Model_Biases.txt", "r")
 
+		first = True
+		i = -1
 
+		for line in f:
 
-def Model_Creator(self, n_inputs, n_neurons, n_outputs):
+			values = line.split()
 
-	#Instantiate the model
-	model = Model()
+			if values == []:
+				i+=1
 
-	#Add layers
-	model.add(Layer_Dense(n_inputs,n_neurons))
-	model.add(Activation_ReLu())
-	model.add(Layer_Dense(n_neurons,n_neurons))
-	model.add(Activation_ReLu())
-	model.add(Layer_Output(n_neurons,n_outputs))
-	model.add(Activation_SoftMax())
+			else:
 
-	#Finalize the model
-	model.finalize()
+				if first == True:
 
-	return model
+					first = False
+
+					if int(values[0]) != self.n_inputs:
+						print("Number of Model Inputs Does Not Match")
+						return -1
+
+					elif int(values[1]) != self.n_neurons:
+						print("Number of Model Neurons Does Not Match")
+						return -1
+
+					elif int(values[2]) != self.n_outputs:
+						print("Number of Model Outputs Does Not Match")
+						return -1
+
+				else:
+
+					while not(hasattr(self.layers[i], "biases")):
+						i+=1
+
+					for j in range(self.layers[i].biases.shape[1]):
+
+						self.layers[i].biases[0][j] = float(values[j])
 
 
 
@@ -314,3 +386,20 @@ class Generation:
 
 		self.population = new_population
 
+def Model_Creator(self, n_inputs, n_neurons, n_outputs):
+
+	#Instantiate the model
+	model = Model(n_inputs, n_neurons, n_outputs)
+
+	#Add layers
+	model.add(Layer_Dense(n_inputs,n_neurons))
+	model.add(Activation_ReLu())
+	model.add(Layer_Dense(n_neurons,n_neurons))
+	model.add(Activation_ReLu())
+	model.add(Layer_Output(n_neurons,n_outputs))
+	model.add(Activation_SoftMax())
+
+	#Finalize the model
+	model.finalize()
+
+	return model
