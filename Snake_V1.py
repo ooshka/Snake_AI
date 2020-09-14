@@ -2,9 +2,6 @@
 Snake V0
 2020-07-22
 """
-
-
-
 import sys
 import pygame
 import copy
@@ -20,9 +17,9 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 
-def draw_rect(x,y,color,size,b):
+def draw_rect(x, y, color, size, border, top_bar):
 
-    rect = pygame.Rect(x*size, y*size, size-b, size-b)
+    rect = pygame.Rect(x*size, y*size + top_bar, size-border, size-border)
     pygame.draw.rect(SCREEN, color, rect)
 
 def random_insert(Array, size):
@@ -46,42 +43,46 @@ program_over = False
 first = True
 
 disp_size = 600
+top_bar = 50
 n_boxes = 10
-fps = 25
+fps = 5
 border = 1
 high_score = 0
+model_high_score = 0
 
 #Neural Network Details
-#######################################################################################
+######################################################################################################
 
-pop_size = 1
+pop_size = 100
 trials = 5
-generations = 1
+generations = 500
 n_inputs = 6
 
 gen = nw.Generation(n_inputs = n_inputs, n_neurons = 64, n_outputs = 4, population_size = pop_size)
 
-#######################################################################################
+######################################################################################################
+
+######################################################################################################
+#Setup Display Details
+
+pygame.init()
+
+SCREEN = pygame.display.set_mode((disp_size,disp_size + top_bar))
+pygame.display.set_caption("Snake Genetic AI")
+
+pygame.init()
+
+SCREEN = pygame.display.set_mode((disp_size,disp_size + top_bar))
+pygame.display.set_caption("Snake Genetic AI")
+
+CLOCK = pygame.time.Clock()
+
+#Initial Grid Setup
+SCREEN.fill(WHITE)
+box_size = int(disp_size/n_boxes)
+
 
 for generation in range(generations):
-
-    if generation == generations-1:
-        #pass
-        game = True
-
-    if game == True:
-
-        pygame.init()
-
-        SCREEN = pygame.display.set_mode((disp_size,disp_size))
-
-        pygame.display.set_caption("Snake V0")
-
-        CLOCK = pygame.time.Clock()
-
-        #Initial Grid Setup
-        SCREEN.fill(WHITE)
-        box_size = int(disp_size/n_boxes)
 
     for model in gen.population:
 
@@ -104,6 +105,7 @@ for generation in range(generations):
                 dir = [0,0]
                 grow = False
                 tick = 0
+                score = 0
                 food_bonus = 25
                 num_moves = food_bonus
 
@@ -236,29 +238,51 @@ for generation in range(generations):
 
                         if game == True:
 
+                            SCREEN.fill(WHITE)
+                            
+                            font = pygame.font.Font("C:\Windows\Fonts\Arial.ttf", 24)
+                            gen_text = font.render(f"Generation: {generation+1}", True, BLACK)
+                            gen_text_rect = gen_text.get_rect()
+                            gen_text_rect.center = (int(disp_size*0.25), int(top_bar/2))
+
+                            SCREEN.blit(gen_text, gen_text_rect)
+
+                            score_text = font.render(f"Score: {score}", True, BLACK)
+                            score_text_rect = gen_text.get_rect()
+                            score_text_rect.center = (int(disp_size*0.75), int(top_bar/2))
+
+                            SCREEN.blit(score_text, score_text_rect)
+
                             for x in range(len(A)):
                                 for y in range(len(A)):
                                     if A[x,y] == 0:
-                                        draw_rect(y,x,BLACK,box_size,border)
+                                        draw_rect(y,x,BLACK,box_size,border, top_bar)
                                     if A[x,y] == 1:
-                                        draw_rect(y,x,BLUE,box_size,border)
+                                        draw_rect(y,x,BLUE,box_size,border, top_bar)
                                     if A[x,y] == 2:
-                                        draw_rect(y,x,GREEN,box_size,border)
+                                        draw_rect(y,x,GREEN,box_size,border, top_bar)
                             CLOCK.tick(fps)
                             pygame.display.update()
 
                         tick += 1
                         num_moves -= 1
 
-                #Once we've broken out of the loop quit the game
-                score = tick*(len(snake.body))
+                    
+                    score = tick*(len(snake.body))
 
+                game = False
+
+                if score > high_score and trial < trials:
+                    high_score = score
+                    game = False
+
+                #Once we've broken out of the loop quit the game
                 model.score += score
  
             model.score = model.score/trials
 
-            if model.score > high_score:
-                high_score = model.score
+            if model.score > model_high_score:
+                model_high_score = model.score
                 model.Model_Write()
 
     gen.score_sort()

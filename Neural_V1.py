@@ -132,16 +132,6 @@ class Model:
 
 				if hasattr(child.layers[i], 'weights'):
 
-					'''
-					pass_on = bool(random.getrandbits(1))
-					
-					if pass_on == True:
-						child.layers[i].weights = self.layers[i].weights
-					else:
-						child.layers[i].weights = mom.layers[i].weights
-
-					'''
-
 					for x in range(child.layers[i].weights.shape[0]):
 						for j in range(child.layers[i].weights.shape[1]):
 
@@ -154,15 +144,6 @@ class Model:
 					
 
 				if hasattr(child.layers[i], "biases"):
-					'''
-					pass_on = bool(random.getrandbits(1))
-
-					
-					if pass_on == True:
-						child.layers[i].biases = self.layers[i].biases
-					else:
-						child.layers[i].biases = mom.layers[i].biases
-					'''
 
 					for j in range(child.layers[i].biases.shape[1]):
 
@@ -191,11 +172,6 @@ class Model:
 						up_down = random.uniform(-mutate_strength, mutate_strength)
 						child.layers[i].biases[0][j]*= (1+up_down)
 
-
-
-
-
-
 		child.score = 0
          
 		return child
@@ -216,7 +192,7 @@ class Model:
 
 	def Model_Write(self):
 
-		f = open("Model_Weights.txt", "w")
+		f = open("Model_Weights.txt", "w+")
 
 		f.write("%s " % self.n_inputs)
 		f.write("%s " % self.n_neurons)
@@ -238,7 +214,7 @@ class Model:
 
 		f.close
 
-		f = open("Model_Biases.txt", "w")
+		f = open("Model_Biases.txt", "w+")
 
 		f.write("%s " % self.n_inputs)
 		f.write("%s " % self.n_neurons)
@@ -259,7 +235,12 @@ class Model:
 
 	def Model_Read(self):
 
-		f = open("Model_Weights.txt", "r")
+		try:
+			f = open("Model_Weights.txt", "r")
+
+		except:
+			print("unable to open stored model data")
+			return
 
 		first = True
 		i = -1
@@ -378,7 +359,7 @@ class Generation:
 
 			else:
 
-				offspring = self.population[p1_indx].mate(self.population[p2_indx], True)
+				offspring = self.population[p1_indx].mate(self.population[p2_indx], mutate= True)
 
 			new_population.append(offspring)
 
