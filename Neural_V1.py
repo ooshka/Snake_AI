@@ -122,16 +122,21 @@ class Model:
 
 				#We are ignoring the loss aspect of the training b/c genetic
 
+	#mating function to propogate "good genes" to the next generation
 	def mate(self, mom, mutate = False, mutate_strength = 0.05):
 		
+		#create a copy of the model that was passed into the function
 		child = copy.deepcopy(self)
 
+		#For the models we are mating and not mutating
 		if mutate == False:
 
+			#For all the layers within the model
 			for i in range(len(child.layers)):
-
+				#If the layer is a weight layer (i.e. a neuron layer and not an activation layer)
 				if hasattr(child.layers[i], 'weights'):
 
+					#Iterate over all weights within the layer and pass on either of the parent's weights depending on the random bool pass_on
 					for x in range(child.layers[i].weights.shape[0]):
 						for j in range(child.layers[i].weights.shape[1]):
 
@@ -142,9 +147,10 @@ class Model:
 							else:
 								child.layers[i].weights[x][j] = mom.layers[i].weights[x][j]
 					
-
+				#If the layer is a bias layer (redundant as if a layer has weights it will typically have biases)
 				if hasattr(child.layers[i], "biases"):
 
+					#iterate over biases and do the same thing as above
 					for j in range(child.layers[i].biases.shape[1]):
 
 						pass_on = bool(random.getrandbits(1))
@@ -154,9 +160,10 @@ class Model:
 
 						else:
 							child.layers[i].biases[0][j] = mom.layers[i].biases[0][j]
-				
+		
+		#If we are mutating instead of mating come here	
 		else:
-
+			
 			for i in range(len(child.layers)):
 
 				if hasattr(child.layers[i], 'weights'):
@@ -322,10 +329,6 @@ class Model:
 					for j in range(self.layers[i].biases.shape[1]):
 
 						self.layers[i].biases[0][j] = float(values[j])
-
-
-
-
 
 
 #Define a super generation class to include a population of models
