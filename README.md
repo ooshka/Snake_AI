@@ -8,14 +8,14 @@ The best performing models from each generation are then "bred" to pass along th
 
 The project consists of four main files:
 
--main.py
- - contains main project loop and instantiates primary class structures for neural network
--neural.py
- - contains all components necessary to build evoluationary neural network (applicablation independent)
--game_logic.py
- - contains game logic code to track the status of the Snake game and check for game over states
--display.py
- - contains pygame details to present the game and the neural network progress to the user
+- main.py
+  - contains main project loop and instantiates primary class structures for neural network
+- neural.py
+  - contains all components necessary to build evoluationary neural network (applicablation independent)
+- game_logic.py
+  - contains game logic code to track the status of the Snake game and check for game over states
+- display.py
+  - contains pygame details to present the game and the neural network progress to the user
 
 ## Getting Started
 
@@ -44,10 +44,10 @@ The primary use case for this project is training evolutionary neural networks. 
 
 Within main.py the following parameters are editable by the user (future commits will have these values directly inputted by user):
 
-`pop size` - The model population size of each generation (how many neural networks per generation)
-`trials` - The number of trials each model is given to play Snake before the next model takes its turn
-`generations` - The number of generations to be tested.  Each generation will be bred from the one before it
-`n_neurons` - The number of neurons to be used for each hidden layer of the neural network (more takes more comp time but may lead to faster learning)
+`pop size` - The model population size of each generation (how many neural networks per generation)\
+`trials` - The number of trials each model is given to play Snake before the next model takes its turn\
+`generations` - The number of generations to be tested.  Each generation will be bred from the one before it\
+`n_neurons` - The number of neurons to be used for each hidden layer of the neural network (more takes more comp time but may lead to faster learning)\
 
 ### display.py
 
