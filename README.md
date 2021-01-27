@@ -56,6 +56,12 @@ Within main.py the following parameters are editable by the user (future commits
 
 The initialization for the Display class contains all parameters governing the spacing and look of the pygame GUI.  If desired the user can alter these values to change the spacing and shape of the game display
 
+### misc.
+
+The best performing models have their details recorded in `Model_Biases.txt` and `Model_Weights.txt`.  
+
+These files contain the weights and biases responsible for influencing the model's behaviour.  When the program is opened it looks for these files and saves the information to one of the models.  This means that the best models are saved, but to start from scratch the user must delete both `Model_Biases.txt` and `Model_Weights.txt`.
+
 ## Contact
 
 Alex Wadey - wadeyalex@gmail.com
