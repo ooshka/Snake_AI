@@ -1,7 +1,17 @@
-"""
- Neural Network Intro
- 2020-08-02
-"""
+#####################################################################################################################
+## Title: Disply
+#####################################################################################################################
+## Description: Contains all the components of a modular genetic neural network with the following structure:
+##              Generation --> Model --> Layers
+##				Each generation can contain an arbitrary number of unique neural networks (models), which in turn
+##				are built from any number of layers (input, hidden, and output).  Generations are evolved by
+##				mating the models within them to pass along the best attributes of the previous generation
+#####################################################################################################################
+## Author: Alex Wadey
+## Version: 1.0
+## Email: wadeyalex@gmail.com
+## Status: active
+#####################################################################################################################
  
 import sys
 import numpy as np
@@ -24,12 +34,8 @@ class Layer_Dense:
 
 	#Layer Initialization
 	def __init__(self, n_inputs, n_neurons):
-		#Initialize both weights and biases
+		#Initialize both weights and biases to some random small number
 		self.weights = 1 * np.random.randn(n_inputs, n_neurons)
-
-		#This initializes the biases to zero.  We may not want this as the genetic algorithm has no way to alter the biases through mating
-		#self.biases = np.zeros((1, n_neurons))
-
 		self.biases = 1 * np.random.randn(1, n_neurons)
 
 	#Forward Pass Through Neuron
@@ -43,6 +49,7 @@ class Layer_Output:
 	#Layer Initialization
 	def __init__(self, n_inputs, n_outputs):
 
+		#There are no biases for the output layer
 		self.weights = 0.01 * np.random.randn(n_inputs, n_outputs)
 
 	def forward(self, inputs):
@@ -147,7 +154,7 @@ class Model:
 							else:
 								child.layers[i].weights[x][j] = mom.layers[i].weights[x][j]
 					
-				#If the layer is a bias layer (redundant as if a layer has weights it will typically have biases)
+				#If the layer is a bias layer (redundant: if a layer has weights it will typically have biases)
 				if hasattr(child.layers[i], "biases"):
 
 					#iterate over biases and do the same thing as above
@@ -164,23 +171,33 @@ class Model:
 		#If we are mutating instead of mating come here	
 		else:
 			
+			#For each layer within the model
 			for i in range(len(child.layers)):
 
+				#If the layer has weights
 				if hasattr(child.layers[i], 'weights'):
 
+					#Iterate through each of the weights and mutate them
 					for x in range(child.layers[i].weights.shape[0]):
 						for j in range(child.layers[i].weights.shape[1]):
+							#Randomly decide if the weight should be tweaked more positively or negatively
 							up_down = random.uniform(-mutate_strength, mutate_strength)
+							#Mutate the weight
 							child.layers[i].weights[x][j]*= (1+up_down)
 
+				#If layer has biases
 				if hasattr(child.layers[i], 'biases'):
-
+					#Iterate through each bias and mutate
 					for j in range(child.layers[i].biases.shape[1]):
+						#Randomly decide if the weight should be tweaked more positively or negatively
 						up_down = random.uniform(-mutate_strength, mutate_strength)
+						#Mutate the weight
 						child.layers[i].biases[0][j]*= (1+up_down)
 
+		#Set the score of the new model to zero
 		child.score = 0
          
+        #Return the new model
 		return child
 
 	#Perform the large forward pass of the model
@@ -194,54 +211,70 @@ class Model:
 			layer.forward(layer.prev.output)
 
 		# 'layer' is now the last object in the list so we should return its output
-		#In our case this probably should be the probabilities of the choices
+		#In our case this will be the probabilities of the choices
 		return layer.output
 
+	#Write a model to a text file
 	def Model_Write(self):
 
+		#Open text file with write permissions
 		f = open("Model_Weights.txt", "w+")
 
+		#Initially write the key details of the model
 		f.write("%s " % self.n_inputs)
 		f.write("%s " % self.n_neurons)
 		f.write("%s " % self.n_outputs)
 
+		#Iterate across the layers in the model
 		for i in range(len(self.layers)):
-
+			#If the layer has weights
 			if hasattr(self.layers[i], 'weights'):
 
+				#New line to divide between weighted layers
 				f.write("\n")
 
 				for x in range(self.layers[i].weights.shape[0]):
 					
+					#New line to divide between weight sets
 					f.write("\n")
 
 					for j in range(self.layers[i].weights.shape[1]):
 
+						#Write model weights to file
 						f.write("%s " % self.layers[i].weights[x][j])
 
+		#Close file
 		f.close
 
+		#Open model biases text file
 		f = open("Model_Biases.txt", "w+")
 
+		#Initially write the key details of the model
 		f.write("%s " % self.n_inputs)
 		f.write("%s " % self.n_neurons)
 		f.write("%s " % self.n_outputs)
 
+		#for each layer in the model
 		for i in range(len(self.layers)):
 
+			#If layer has bias
 			if hasattr(self.layers[i], 'biases'):
 
+				#Add new line in between bias sets
 				f.write("\n")
 				f.write("\n")
 
 				for j in range(self.layers[i].biases.shape[1]):
-
+					#Write biases to file
 					f.write("%s " % self.layers[i].biases[0][j])
 
+		#Close file
 		f.close
 
+	#Read model weights and biases from file
 	def Model_Read(self):
 
+		#Try to open file, but if not possible return error message
 		try:
 			f = open("Model_Weights.txt", "r")
 
@@ -249,24 +282,31 @@ class Model:
 			print("unable to open stored model data")
 			return
 
+		#Set iterable defaults
 		first = True
 		i = -1
 		x = 0
 
+		#For each line in the file
 		for line in f:
 
+			#Split the line into a list of words
 			values = line.split()
 
+			#If the line is empty alter iterables
 			if values == []:
 				x = -1
 				i+=1
 
+			#If line is not empty
 			else:
 
+				#If this is the first line then check the model details to see if they match
 				if first == True:
-
+					#Set first to false after reading first line
 					first = False
 
+					#Check to see if model parameters match those in the written files
 					if int(values[0]) != self.n_inputs:
 						print("Number of Model Inputs Does Not Match")
 						return -1
@@ -279,27 +319,36 @@ class Model:
 						print("Number of Model Outputs Does Not Match")
 						return -1
 
+				#If everything matches up
 				else:
-
+					#Iterate until we reach a layer that has weights
 					while not(hasattr(self.layers[i], "weights")):
 						i+=1
 
+					#Iterate through the layer and add the values from file
 					for j in range(self.layers[i].weights.shape[1]):
 
 						self.layers[i].weights[x][j] = float(values[j])
+			#Iterate
 			x+=1
+
+		#Close file
 		f.close
 
-
+		#Open biases file.  The assumption is made that if the weights file opened then the biases file will to
 		f = open("Model_Biases.txt", "r")
 
+		#Set iterables and boolean
 		first = True
 		i = -1
 
+		#For each line in the file
 		for line in f:
 
+			#Split the line into a list of words
 			values = line.split()
 
+			#If the line is empty alter iterables
 			if values == []:
 				i+=1
 
@@ -309,6 +358,7 @@ class Model:
 
 					first = False
 
+					#Check to see if model parameters match those in the written files
 					if int(values[0]) != self.n_inputs:
 						print("Number of Model Inputs Does Not Match")
 						return -1
@@ -322,10 +372,12 @@ class Model:
 						return -1
 
 				else:
-
+					
+					#Iterate until a bias layer has been reached
 					while not(hasattr(self.layers[i], "biases")):
 						i+=1
 
+					#Read the biases for that layer into the model
 					for j in range(self.layers[i].biases.shape[1]):
 
 						self.layers[i].biases[0][j] = float(values[j])
@@ -333,41 +385,60 @@ class Model:
 
 #Define a super generation class to include a population of models
 class Generation:
-	def __init__(self, n_inputs, n_neurons, n_outputs, mating = True,  population_size = 100, threshold = 10, mutate_threshold = 0.75):
+	def __init__(self, n_inputs, n_neurons, n_outputs, mating = True,  population_size = 100, threshold = 10, mutate_threshold = 0.50):
 		
+		#Number of models per generation
 		self.population_size = population_size
+		#Boolean value to decide if mating is turned on or not
 		self.mating = mating
+		#Percentage of models to use in mating for the next generation
 		self.threshold = threshold
+		#The fraction of models under which models mate with one another.  i.e. 0.75 means 75% of models mate and 15% of models mutate off of the best model
 		self.mutate_threshold = mutate_threshold
 
+		#Create the model population
 		self.population = []
 		for i in range(population_size):
+			#Create models with the predefined number of inputs, neurons, and outpus
 			self.population.append(Model_Creator(self, n_inputs, n_neurons, n_outputs))
 
+	#Sort the generation's population based on score
 	def score_sort(self):
-
+		#Sort the population based on score so highest becomes the first index
 		self.population.sort(key = lambda x: x.score, reverse = True)
+		#Return the top score of the generation
+		return self.population[0].score
 
+	#Mate models within the generation to produce the next generation offspring
 	def generation_mate(self):
 
+		#Define place holder for next generation
 		new_population = []
 
+		#Iterate over the population
 		for i in range(self.population_size):
+			#Loop through the self.threshold number of top models and use as parent one
 			p1_indx = i % self.threshold
+
+			#Choose parent two randomly from the population
 			p2_indx = min(self.population_size - 1, int(np.random.exponential(self.threshold)))
 
-			if i < self.mutate_threshold:
+			#If the model number is under the mutation threshold then mate without mutating
+			if i < int(self.mutate_threshold*self.population_size):
 
 				offspring = self.population[p1_indx].mate(self.population[p2_indx])
 
+			#If the model number is above the mutation threshold mate with mutating
 			else:
 
 				offspring = self.population[p1_indx].mate(self.population[p2_indx], mutate= True)
-
+			#Add the offspring to the new population
 			new_population.append(offspring)
 
+		#In order to preserve the best models pass along the best model from the previous generation to the new one
 		new_population[-1] = self.population[0]
 
+		#Overwrite the old model population with the new one
 		self.population = new_population
 
 def Model_Creator(self, n_inputs, n_neurons, n_outputs):
